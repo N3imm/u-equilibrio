@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "606969836833",
+    "firebase_url": "https://u-equilibrio-default-rtdb.firebaseio.com",
+    "project_id": "u-equilibrio",
+    "storage_bucket": "u-equilibrio.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:606969836833:android:d3dfdb67076d2b26a2fa60",
+        "android_client_info": {
+          "package_name": "com.example.u_equilibrio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSsc5oAnm-d_MWXuSAUi3J-Hc9e862B6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
