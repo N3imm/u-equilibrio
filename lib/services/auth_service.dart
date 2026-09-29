@@ -1,11 +1,13 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Esta clase centraliza toda la comunicación con Firebase Authentication.
 /// Las pantallas (login_screen, register_screen) solo llaman a estos métodos,
 /// sin tener que conocer los detalles de FirebaseAuth directamente.
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   /// Stream que emite el usuario actual cada vez que cambia
   /// (inicia sesión, cierra sesión, etc). main.dart lo usa para
@@ -18,10 +20,17 @@ class AuthService {
   /// o un mensaje de error legible si algo falló.
   Future<String?> registrarUsuario(String email, String password) async {
     try {
-      await _auth.createUserWithEmailAndPassword(
+      final credencial = await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
+      // Guardamos un perfil básico en Firestore (fuera de Authentication)
+      // para poder consultar y ampliar los datos del usuario más adelante,
+      // y para verlo directamente en la base de datos.
+      await _db.collection('usuarios').doc(credencial.user!.uid).set({
+        'email': email.trim(),
+        'fechaRegistro': Timestamp.now(),
+      });
       return null;
     } on FirebaseAuthException catch (e) {
       return _traducirError(e.code);

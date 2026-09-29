@@ -1,8 +1,7 @@
-  
-
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'automonitoreo_screen.dart';
+import 'pausas_activas_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -42,8 +41,18 @@ class HomeScreen extends StatelessWidget {
                 );
               },
             ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.self_improvement),
+              label: const Text('Ver pausas activas'),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PausasActivasScreen()),
+                );
+              },
+            ),
           ],
-        ),
+        ), 
       ),
     );
   }

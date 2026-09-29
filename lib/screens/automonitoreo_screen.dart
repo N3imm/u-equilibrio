@@ -27,16 +27,32 @@ class _AutomonitoreoScreenState extends State<AutomonitoreoScreen> {
 
   Future<void> _guardar() async {
     setState(() => _guardando = true);
-    await _estresService.guardarRegistro(
-      _nivelSeleccionado,
-      _notasController.text.trim(),
-    );
-    _notasController.clear();
-    if (!mounted) return;
-    setState(() => _guardando = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Registro guardado')),
-    );
+    try {
+      await _estresService.guardarRegistro(
+        _nivelSeleccionado,
+        _notasController.text.trim(),
+      );
+      _notasController.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registro guardado')),
+        );
+      }
+    } catch (e) {
+      // Si algo falla (ej. sin conexión a internet), ahora lo verás
+      // en pantalla en vez de quedarte con el círculo de carga pegado.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar: $e')),
+        );
+      }
+    } finally {
+      // El "finally" se ejecuta SIEMPRE, haya error o no,
+      // así que el botón nunca vuelve a quedarse en modo "cargando" para siempre.
+      if (mounted) {
+        setState(() => _guardando = false);
+      }
+    }
   }
 
   String _formatearFecha(DateTime fecha) {
