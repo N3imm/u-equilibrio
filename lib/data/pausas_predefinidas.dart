@@ -1,4 +1,3 @@
-// UBICACIÓN: lib/data/pausas_predefinidas.dart
 
 import '../models/pausa_activa.dart';
 
@@ -14,6 +13,7 @@ const List<PausaActiva> pausasPredefinidas = [
         'y exhala lentamente por la boca contando hasta 8. Repite 4 veces.',
     duracionMinutos: 2,
     categoria: 'respiracion',
+    videoUrl: 'https://www.youtube.com/watch?v=4v9N6dAkAKw',
   ),
   PausaActiva(
     titulo: 'Respiración diafragmática',
@@ -22,6 +22,7 @@ const List<PausaActiva> pausasPredefinidas = [
         'Respira profundo llenando el abdomen (no el pecho) durante 1 minuto.',
     duracionMinutos: 3,
     categoria: 'respiracion',
+    videoUrl: 'https://www.youtube.com/watch?v=WkzMBxohi1M',
   ),
   PausaActiva(
     titulo: 'Estiramiento de cuello y hombros',

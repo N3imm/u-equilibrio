@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../services/estres_service.dart';
 import '../models/registro_estres.dart';
+import '../theme/app_theme.dart';
 
 class AutomonitoreoScreen extends StatefulWidget {
   const AutomonitoreoScreen({super.key});
@@ -91,10 +92,10 @@ class _AutomonitoreoScreenState extends State<AutomonitoreoScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: seleccionado
-                                  ? Colors.teal.withOpacity(0.2)
+                                  ? ColoresUTS.verde.withOpacity(0.3)
                                   : Colors.transparent,
                               border: Border.all(
-                                color: seleccionado ? Colors.teal : Colors.grey,
+                                color: seleccionado ? ColoresUTS.verde : Colors.grey,
                               ),
                             ),
                             child: Text(_emojis[i],

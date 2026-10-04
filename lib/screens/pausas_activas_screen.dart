@@ -1,9 +1,11 @@
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/estres_service.dart';
 import '../models/registro_estres.dart';
 import '../models/pausa_activa.dart';
 import '../data/pausas_predefinidas.dart';
+import '../theme/app_theme.dart';
 
 /// Muestra una pausa activa sugerida según el nivel de estrés del
 /// último registro guardado (objetivo específico 3: sistema de
@@ -89,21 +91,48 @@ class _TarjetaPausa extends StatelessWidget {
 
   const _TarjetaPausa({required this.pausa, required this.destacada});
 
+  Future<void> _abrirVideo(BuildContext context) async {
+    final uri = Uri.parse(pausa.videoUrl!);
+    final abierto = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!abierto && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el video')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: destacada ? Colors.teal.withOpacity(0.1) : null,
+      color: destacada ? ColoresUTS.verde.withOpacity(0.15) : null,
       shape: destacada
           ? RoundedRectangleBorder(
-              side: const BorderSide(color: Colors.teal),
+              side: const BorderSide(color: ColoresUTS.verde, width: 1.5),
               borderRadius: BorderRadius.circular(8),
             )
           : null,
       margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        title: Text(pausa.titulo),
-        subtitle: Text(pausa.descripcion),
-        trailing: Text('${pausa.duracionMinutos} min'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ListTile(
+            title: Text(pausa.titulo),
+            subtitle: Text(pausa.descripcion),
+            trailing: Text('${pausa.duracionMinutos} min'),
+          ),
+          if (pausa.videoUrl != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _abrirVideo(context),
+                  icon: const Icon(Icons.play_circle_outline),
+                  label: const Text('Ver video de cómo hacerlo'),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
