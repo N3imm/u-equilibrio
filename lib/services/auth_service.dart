@@ -18,7 +18,11 @@ class AuthService {
 
   /// Registra un nuevo usuario. Devuelve null si todo salió bien,
   /// o un mensaje de error legible si algo falló.
-  Future<String?> registrarUsuario(String email, String password) async {
+  Future<String?> registrarUsuario(
+    String email,
+    String password, {
+    bool aceptoTratamientoDatos = false,
+  }) async {
     try {
       final credencial = await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
@@ -30,6 +34,9 @@ class AuthService {
       await _db.collection('usuarios').doc(credencial.user!.uid).set({
         'email': email.trim(),
         'fechaRegistro': Timestamp.now(),
+        // Constancia del consentimiento informado (Ley 1581 de 2012).
+        'aceptoTratamientoDatos': aceptoTratamientoDatos,
+        'fechaConsentimiento': Timestamp.now(),
       });
       return null;
     } on FirebaseAuthException catch (e) {
