@@ -1,7 +1,8 @@
-// UBICACIÓN: lib/screens/automonitoreo_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import '../data/niveles_estres.dart';
 import '../services/estres_service.dart';
 import '../models/registro_estres.dart';
 import '../theme/app_theme.dart';
@@ -19,15 +20,6 @@ class _AutomonitoreoScreenState extends State<AutomonitoreoScreen> {
   int _nivelSeleccionado = 3;
   bool _guardando = false;
 
-  static const List<String> _emojis = ['😄', '🙂', '😐', '😟', '😫'];
-  static const List<String> _etiquetas = [
-    'Muy bajo',
-    'Bajo',
-    'Medio',
-    'Alto',
-    'Muy alto',
-  ];
-
   Future<void> _guardar() async {
     setState(() => _guardando = true);
     try {
@@ -36,6 +28,8 @@ class _AutomonitoreoScreenState extends State<AutomonitoreoScreen> {
         _notasController.text.trim(),
       );
       _notasController.clear();
+      // Vibración corta como confirmación de que se guardó.
+      HapticFeedback.lightImpact();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registro guardado')),
@@ -83,31 +77,62 @@ class _AutomonitoreoScreenState extends State<AutomonitoreoScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(5, (i) {
                     final nivel = i + 1;
                     final seleccionado = nivel == _nivelSeleccionado;
+                    final color = NivelesEstres.colores[i];
                     return GestureDetector(
-                      onTap: () => setState(() => _nivelSeleccionado = nivel),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        // Vibración suave al elegir un nivel.
+                        HapticFeedback.selectionClick();
+                        setState(() => _nivelSeleccionado = nivel);
+                      },
                       child: Column(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: seleccionado
-                                  ? ColoresUTS.verde.withOpacity(0.3)
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: seleccionado ? ColoresUTS.verde : Colors.grey,
+                          // El emoji elegido "crece" con un pequeño rebote.
+                          AnimatedScale(
+                            scale: seleccionado ? 1.3 : 1.0,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOutBack,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: seleccionado
+                                    ? color.withOpacity(0.25)
+                                    : Colors.transparent,
+                                border: Border.all(
+                                  color: seleccionado
+                                      ? color
+                                      : Colors.grey.shade400,
+                                  width: seleccionado ? 2.5 : 1,
+                                ),
+                              ),
+                              child: Text(
+                                NivelesEstres.emojis[i],
+                                style: const TextStyle(fontSize: 28),
                               ),
                             ),
-                            child: Text(_emojis[i],
-                                style: const TextStyle(fontSize: 28)),
                           ),
-                          const SizedBox(height: 4),
-                          Text(_etiquetas[i], style: const TextStyle(fontSize: 11)),
+                          const SizedBox(height: 12),
+                          AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 250),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: seleccionado
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: seleccionado
+                                  ? ColoresUTS.grisOscuro
+                                  : ColoresUTS.gris,
+                            ),
+                            child: Text(NivelesEstres.etiquetas[i]),
+                          ),
                         ],
                       ),
                     );
@@ -167,9 +192,22 @@ class _AutomonitoreoScreenState extends State<AutomonitoreoScreen> {
                   itemBuilder: (context, index) {
                     final r = registros[index];
                     return ListTile(
-                      leading: Text(_emojis[r.nivel - 1],
-                          style: const TextStyle(fontSize: 24)),
-                      title: Text(_etiquetas[r.nivel - 1]),
+                      // El emoji va dentro de un círculo del color de su nivel.
+                      leading: Container(
+                        width: 44,
+                        height: 44,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: NivelesEstres.colores[r.nivel - 1]
+                              .withOpacity(0.25),
+                        ),
+                        child: Text(
+                          NivelesEstres.emojis[r.nivel - 1],
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                      ),
+                      title: Text(NivelesEstres.etiquetas[r.nivel - 1]),
                       subtitle: r.notas.isNotEmpty ? Text(r.notas) : null,
                       trailing: Text(_formatearFecha(r.fecha),
                           style: const TextStyle(fontSize: 11)),

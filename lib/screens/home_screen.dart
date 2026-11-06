@@ -295,7 +295,7 @@ class _TarjetaUltimoRegistro extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: ColoresUTS.verde.withOpacity(0.25),
+                    color: NivelesEstres.colores[nivel - 1].withOpacity(0.25),
                   ),
                   child: Text(
                     NivelesEstres.emojis[nivel - 1],
@@ -335,7 +335,7 @@ class _TarjetaUltimoRegistro extends StatelessWidget {
                   value: valor,
                   minHeight: 10,
                   backgroundColor: Colors.grey.shade200,
-                  color: ColoresUTS.verde,
+                  color: NivelesEstres.colores[nivel - 1],
                 ),
               ),
             ),
