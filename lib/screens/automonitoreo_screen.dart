@@ -1,5 +1,7 @@
+// UBICACIÓN: lib/screens/automonitoreo_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../services/estres_service.dart';
 import '../models/registro_estres.dart';
 import '../theme/app_theme.dart';
@@ -43,8 +45,11 @@ class _AutomonitoreoScreenState extends State<AutomonitoreoScreen> {
       // Si algo falla (ej. sin conexión a internet), ahora lo verás
       // en pantalla en vez de quedarte con el círculo de carga pegado.
       if (mounted) {
+        final mensaje = (e is FirebaseException && e.code == 'permission-denied')
+            ? 'Permiso denegado: revisa las reglas de seguridad de Firestore.'
+            : 'Error al guardar: $e';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar: $e')),
+          SnackBar(content: Text(mensaje)),
         );
       }
     } finally {
@@ -138,6 +143,18 @@ class _AutomonitoreoScreenState extends State<AutomonitoreoScreen> {
             child: StreamBuilder<List<RegistroEstres>>(
               stream: _estresService.streamRegistros(),
               builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        'No se pudo cargar el historial. '
+                        'Verifica tu conexión y los permisos de Firestore.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
