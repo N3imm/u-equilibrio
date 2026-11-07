@@ -1,3 +1,4 @@
+// UBICACIÓN: lib/data/pausas_predefinidas.dart
 
 import '../models/pausa_activa.dart';
 
@@ -14,6 +15,8 @@ const List<PausaActiva> pausasPredefinidas = [
     duracionMinutos: 2,
     categoria: 'respiracion',
     videoUrl: 'https://www.youtube.com/watch?v=4v9N6dAkAKw',
+    ritmo: [4, 7, 8],
+    ciclos: 4,
   ),
   PausaActiva(
     titulo: 'Respiración diafragmática',
@@ -23,6 +26,8 @@ const List<PausaActiva> pausasPredefinidas = [
     duracionMinutos: 3,
     categoria: 'respiracion',
     videoUrl: 'https://www.youtube.com/watch?v=WkzMBxohi1M',
+    ritmo: [4, 0, 6],
+    ciclos: 6,
   ),
   PausaActiva(
     titulo: 'Estiramiento de cuello y hombros',

@@ -6,6 +6,8 @@ import '../models/registro_estres.dart';
 import '../models/pausa_activa.dart';
 import '../data/pausas_predefinidas.dart';
 import '../theme/app_theme.dart';
+import '../widgets/encabezado_uts.dart';
+import 'guia_respiracion_screen.dart';
 
 /// Muestra una pausa activa sugerida según el nivel de estrés del
 /// último registro guardado (objetivo específico 3: sistema de
@@ -37,49 +39,64 @@ class PausasActivasScreen extends StatelessWidget {
     final estresService = EstresService();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pausas activas')),
-      body: StreamBuilder<List<RegistroEstres>>(
-        stream: estresService.streamRegistros(),
-        builder: (context, snapshot) {
-          final registros = snapshot.data ?? [];
-          final hayRegistros = registros.isNotEmpty;
-          final ultimoNivel = hayRegistros ? registros.first.nivel : 3;
-          final categoriaSugerida = _categoriaSugerida(ultimoNivel);
+      body: Column(
+        children: [
+          const EncabezadoUTS(
+            titulo: 'Pausas activas',
+            subtitulo: 'Pequeños descansos para recargar energía',
+          ),
+          Expanded(
+            child: StreamBuilder<List<RegistroEstres>>(
+              stream: estresService.streamRegistros(),
+              builder: (context, snapshot) {
+                final registros = snapshot.data ?? [];
+                final hayRegistros = registros.isNotEmpty;
+                final ultimoNivel = hayRegistros ? registros.first.nivel : 3;
+                final categoriaSugerida = _categoriaSugerida(ultimoNivel);
 
-          final sugeridas = pausasPredefinidas
-              .where((p) => p.categoria == categoriaSugerida)
-              .toList();
-          final resto = pausasPredefinidas
-              .where((p) => p.categoria != categoriaSugerida)
-              .toList();
+                final sugeridas = pausasPredefinidas
+                    .where((p) => p.categoria == categoriaSugerida)
+                    .toList();
+                final resto = pausasPredefinidas
+                    .where((p) => p.categoria != categoriaSugerida)
+                    .toList();
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (hayRegistros) ...[
-                Text(
-                  _mensajeSugerencia(ultimoNivel),
-                  style:
-                      const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                const SizedBox(height: 8),
-                ...sugeridas.map((p) => _TarjetaPausa(pausa: p, destacada: true)),
-                const SizedBox(height: 20),
-                const Text('Otras pausas disponibles',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-              ] else ...[
-                const Text(
-                  'Todavía no tienes registros de estrés. '
-                  'Aquí tienes algunas pausas activas para empezar:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-              ],
-              ...resto.map((p) => _TarjetaPausa(pausa: p, destacada: false)),
-            ],
-          );
-        },
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    if (hayRegistros) ...[
+                      Text(
+                        _mensajeSugerencia(ultimoNivel),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ...sugeridas
+                          .map((p) => _TarjetaPausa(pausa: p, destacada: true)),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Otras pausas disponibles',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                    ] else ...[
+                      const Text(
+                        'Todavía no tienes registros de estrés. '
+                        'Aquí tienes algunas pausas activas para empezar:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    ...resto
+                        .map((p) => _TarjetaPausa(pausa: p, destacada: false)),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -101,14 +118,25 @@ class _TarjetaPausa extends StatelessWidget {
     }
   }
 
+  void _abrirGuia(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GuiaRespiracionScreen(pausa: pausa),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final tieneGuia = pausa.ritmo != null;
+    final tieneVideo = pausa.videoUrl != null;
+
     return Card(
       color: destacada ? ColoresUTS.verde.withOpacity(0.15) : null,
       shape: destacada
           ? RoundedRectangleBorder(
               side: const BorderSide(color: ColoresUTS.verde, width: 1.5),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(16),
             )
           : null,
       margin: const EdgeInsets.only(bottom: 8),
@@ -120,16 +148,32 @@ class _TarjetaPausa extends StatelessWidget {
             subtitle: Text(pausa.descripcion),
             trailing: Text('${pausa.duracionMinutos} min'),
           ),
-          if (pausa.videoUrl != null)
+          if (tieneGuia || tieneVideo)
             Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => _abrirVideo(context),
-                  icon: const Icon(Icons.play_circle_outline),
-                  label: const Text('Ver video de cómo hacerlo'),
-                ),
+              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 10),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  if (tieneGuia)
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                      ),
+                      onPressed: () => _abrirGuia(context),
+                      icon: const Icon(Icons.air),
+                      label: const Text('Practicar con guía'),
+                    ),
+                  if (tieneVideo)
+                    TextButton.icon(
+                      onPressed: () => _abrirVideo(context),
+                      icon: const Icon(Icons.play_circle_outline),
+                      label: const Text('Ver video'),
+                    ),
+                ],
               ),
             ),
         ],
