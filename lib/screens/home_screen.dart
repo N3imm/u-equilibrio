@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/estres_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/aparecer.dart';
+import '../widgets/tarjeta_semana.dart';
 import 'automonitoreo_screen.dart';
 import 'pausas_activas_screen.dart';
 
@@ -89,11 +90,31 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     const Aparecer(
                       retrasoMs: 300,
-                      child: _TituloSeccion('¿Qué quieres hacer?'),
+                      child: _TituloSeccion('Tu semana'),
                     ),
                     const SizedBox(height: 8),
                     Aparecer(
                       retrasoMs: 400,
+                      // Racha y gráfico semanal, calculados con los
+                      // mismos registros de Firestore (tiempo real).
+                      child: StreamBuilder<List<RegistroEstres>>(
+                        stream: estresService.streamRegistros(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError || !snapshot.hasData) {
+                            return const SizedBox.shrink();
+                          }
+                          return TarjetaSemana(registros: snapshot.data!);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Aparecer(
+                      retrasoMs: 500,
+                      child: _TituloSeccion('¿Qué quieres hacer?'),
+                    ),
+                    const SizedBox(height: 8),
+                    Aparecer(
+                      retrasoMs: 600,
                       child: _TarjetaAccion(
                         icono: Icons.mood,
                         titulo: 'Registrar mi estrés de hoy',
@@ -108,7 +129,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     Aparecer(
-                      retrasoMs: 500,
+                      retrasoMs: 700,
                       child: _TarjetaAccion(
                         icono: Icons.self_improvement,
                         titulo: 'Ver pausas activas',
